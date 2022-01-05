@@ -93,7 +93,7 @@
         android:layout_width="24dp"
         android:layout_height="24dp"
         android:contentDescription="@string/icon_bookmark"
-        android:src="@drawable/ic_bookmark"
+        android:background="@drawable/ic_bookmark"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 

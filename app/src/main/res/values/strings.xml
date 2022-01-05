@@ -7,4 +7,18 @@
     <string name="icon_bookmark">icon bookmark</string>
     <string name="poster_image">poster image</string>
     <string name="release_date">Release Date</string>
+    <string name="movie_db_app">Movie DB App</string>
+    <string name="find_your_movies">Find your movies</string>
+    <string name="search_here">Search Here</string>
+    <string name="icon_image">icon image</string>
+    <string name="categories">Categories</string>
+    <string name="load_more">Load More</string>
+    <string name="watch_list">Watch List</string>
+    <string name="icon_watch_list">icon watch list</string>
+    <string name="background_movie">background movie</string>
+    <string name="overviews">Overviews:</string>
+    <string name="average_rating">Average Rating:</string>
+    <string name="rate_count">Rate Count</string>
+    <string name="popularity">Popularity:</string>
+    <string name="profile_image">profile image</string>
 </resources>

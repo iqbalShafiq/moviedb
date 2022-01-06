@@ -27,4 +27,16 @@ interface MovieDao {
     // Delete movies by category
     @Query("DELETE FROM movie WHERE category = :movieCategory")
     suspend fun deleteMoviesByCategory(movieCategory: String)
+
+    // Get watch list by id
+    @Query("SELECT * FROM movie WHERE id = :movieId")
+    suspend fun getWatchListById(movieId: Int): Movie
+
+    // Delete watch list by id
+    @Query("DELETE FROM movie WHERE (category = 'Watch List' AND id = :movieId)")
+    suspend fun deleteWatchListById(movieId: Int)
+
+    // Set watch list by id
+    @Query("UPDATE movie SET isWatchListed = :isWatchListed WHERE id = :movieId")
+    suspend fun setWatchListById(movieId: Int, isWatchListed: Boolean)
 }

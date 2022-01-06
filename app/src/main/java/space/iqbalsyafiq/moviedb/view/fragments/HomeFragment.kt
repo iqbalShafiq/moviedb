@@ -19,7 +19,7 @@ import space.iqbalsyafiq.moviedb.viewmodel.MovieListViewModel
 class HomeFragment : Fragment() {
 
     private lateinit var binding: FragmentHomeBinding
-    private val viewModel: MovieListViewModel by activityViewModels()
+    val viewModel: MovieListViewModel by activityViewModels()
     private lateinit var adapter: MovieListAdapter
     private var selectedCategory = "Top Rated"
 
@@ -36,7 +36,7 @@ class HomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         // initiate adapter
-        adapter = MovieListAdapter(requireContext(), arrayListOf())
+        adapter = MovieListAdapter(requireContext(), arrayListOf(), this)
 
         // fetch data
         viewModel.refresh("Now Playing")
@@ -68,7 +68,7 @@ class HomeFragment : Fragment() {
                 tvLoadMore.visibility = View.GONE
 
                 adapter.clearMovieList()
-                viewModel.refresh(selectedCategory)
+                viewModel.refreshBypassCache(selectedCategory)
                 refreshLayout.isRefreshing = false
             }
         }
@@ -127,6 +127,10 @@ class HomeFragment : Fragment() {
         unselectedButton.setTextColor(Color.parseColor("#EEEEEE"))
     }
 
+    fun watchListed(movie: Movie) {
+        viewModel.storeWatchList(movie, selectedCategory)
+    }
+
     private fun observeViewModel() {
         viewModel.movies.observe(viewLifecycleOwner, { movieList ->
             movieList?.let {
@@ -134,7 +138,8 @@ class HomeFragment : Fragment() {
                     visibility = View.VISIBLE
                     adapter = MovieListAdapter(
                         requireContext(),
-                        movieList as ArrayList<Movie>
+                        movieList as ArrayList<Movie>,
+                        this@HomeFragment
                     )
                 }
             }

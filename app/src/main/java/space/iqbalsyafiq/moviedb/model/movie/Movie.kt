@@ -35,4 +35,5 @@ data class Movie(
     @PrimaryKey(autoGenerate = true)
     var uuid: Int = 0
     var category: String? = null
+    var isWatchListed: Boolean = false
 }

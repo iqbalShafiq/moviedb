@@ -43,6 +43,15 @@ class MovieListViewModel(application: Application) :
         }
     }
 
+    fun refreshBypassCache(category: String) {
+        when (category) {
+            "Now Playing" -> fetchNowPlayingRemotely()
+            "Top Rated" -> fetchTopRatedRemotely()
+            "Popular" -> fetchPopularRemotely()
+            "Upcoming" -> fetchUpcomingRemotely()
+        }
+    }
+
     private fun fetchFromDatabaseByCategory(category: String) {
         loading.value = true
         launch {
@@ -60,11 +69,7 @@ class MovieListViewModel(application: Application) :
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(object : DisposableSingleObserver<MovieListResponse>() {
                     override fun onSuccess(listMovie: MovieListResponse) {
-                        movies.value = listMovie.results
-                        loadError.value = false
-                        loading.value = false
                         Log.d(TAG, "onSuccess: ${movies.value}")
-
                         storeMovieLocally("Upcoming", listMovie.results)
                     }
 
@@ -87,11 +92,7 @@ class MovieListViewModel(application: Application) :
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(object : DisposableSingleObserver<MovieListResponse>() {
                     override fun onSuccess(listMovie: MovieListResponse) {
-                        movies.value = listMovie.results
-                        loadError.value = false
-                        loading.value = false
                         Log.d(TAG, "onSuccess: ${movies.value}")
-
                         storeMovieLocally("Now Playing", listMovie.results)
                     }
 
@@ -114,11 +115,7 @@ class MovieListViewModel(application: Application) :
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(object : DisposableSingleObserver<MovieListResponse>() {
                     override fun onSuccess(listMovie: MovieListResponse) {
-                        movies.value = listMovie.results
-                        loadError.value = false
-                        loading.value = false
                         Log.d(TAG, "onSuccess: ${movies.value}")
-
                         storeMovieLocally("Top Rated", listMovie.results)
                     }
 
@@ -141,11 +138,7 @@ class MovieListViewModel(application: Application) :
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(object : DisposableSingleObserver<MovieListResponse>() {
                     override fun onSuccess(listMovie: MovieListResponse) {
-                        movies.value = listMovie.results
-                        loadError.value = false
-                        loading.value = false
                         Log.d(TAG, "onSuccess: ${movies.value}")
-
                         storeMovieLocally("Popular", listMovie.results)
                     }
 
@@ -165,9 +158,13 @@ class MovieListViewModel(application: Application) :
             val dao = MovieDatabase(getApplication()).movieDao()
             dao.deleteMoviesByCategory(category)
 
+            // get watch list
+            val watchList = dao.getMoviesByCategory("Watch List")
+
             // set the category of movie
             for (movie in listMovie) {
                 movie.category = category
+                if (watchList.contains(movie)) movie.isWatchListed = true
             }
 
             // store to roomDB
@@ -178,6 +175,31 @@ class MovieListViewModel(application: Application) :
         }
 
         prefHelper.saveListUpdateTime(System.nanoTime(), "List Time $category")
+    }
+
+    fun storeWatchList(movie: Movie, category: String) {
+        launch {
+            // initiate dao & store to watchlist
+            val dao = MovieDatabase(getApplication()).movieDao()
+            Log.d(TAG, "storeWatchList1: ${movie.uuid}")
+
+            // store watchlist to roomDB
+            movie.isWatchListed = !movie.isWatchListed
+            if (movie.isWatchListed) {
+                // create new movie to roomDB
+                movie.category = "Watch List"
+                movie.uuid = System.nanoTime().toInt()
+                dao.insertAll(movie)
+            } else {
+                dao.deleteWatchListById(movie.id)
+            }
+
+            // update watch list stats
+            dao.setWatchListById(movie.id, movie.isWatchListed)
+
+            // get movie by category
+            retrieveMovie(dao.getMoviesByCategory(category))
+        }
     }
 
     private fun retrieveMovie(listMovie: List<Movie>) {

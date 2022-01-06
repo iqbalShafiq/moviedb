@@ -1,7 +1,6 @@
 package space.iqbalsyafiq.moviedb.view.fragments
 
 import android.graphics.Color
-import android.graphics.Typeface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -14,7 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import space.iqbalsyafiq.moviedb.R
 import space.iqbalsyafiq.moviedb.adapter.MovieListAdapter
 import space.iqbalsyafiq.moviedb.databinding.FragmentHomeBinding
-import space.iqbalsyafiq.moviedb.model.movie.MovieResponse
+import space.iqbalsyafiq.moviedb.model.movie.Movie
 import space.iqbalsyafiq.moviedb.viewmodel.MovieListViewModel
 
 class HomeFragment : Fragment() {
@@ -84,47 +83,19 @@ class HomeFragment : Fragment() {
     private fun categoryOnClick() {
         with(binding) {
             btnTopRated.setOnClickListener {
-                selectedCategory = btnTopRated.text.toString()
-                viewModel.refresh("Top Rated")
-                setSelectedButton(
-                    btnTopRated,
-                    btnPopular,
-                    btnNowPlaying,
-                    btnUpcoming
-                )
+                setSelectedButton(btnTopRated, btnPopular, btnNowPlaying, btnUpcoming)
             }
 
             btnPopular.setOnClickListener {
-                selectedCategory = btnPopular.text.toString()
-                viewModel.refresh("Popular")
-                setSelectedButton(
-                    btnPopular,
-                    btnTopRated,
-                    btnNowPlaying,
-                    btnUpcoming
-                )
+                setSelectedButton(btnPopular, btnTopRated, btnNowPlaying, btnUpcoming)
             }
 
             btnNowPlaying.setOnClickListener {
-                selectedCategory = btnNowPlaying.text.toString()
-                viewModel.refresh("Now Playing")
-                setSelectedButton(
-                    btnNowPlaying,
-                    btnTopRated,
-                    btnPopular,
-                    btnUpcoming
-                )
+                setSelectedButton(btnNowPlaying, btnTopRated, btnPopular, btnUpcoming)
             }
 
             btnUpcoming.setOnClickListener {
-                selectedCategory = btnUpcoming.text.toString()
-                viewModel.refresh("Upcoming")
-                setSelectedButton(
-                    btnUpcoming,
-                    btnTopRated,
-                    btnPopular,
-                    btnNowPlaying
-                )
+                setSelectedButton(btnUpcoming, btnTopRated, btnPopular, btnNowPlaying)
             }
         }
     }
@@ -135,25 +106,25 @@ class HomeFragment : Fragment() {
         unselectedButton2: Button,
         unselectedButton3: Button
     ) {
+        // set selected category and load api from view model
+        selectedCategory = selectedButton.text.toString()
+        viewModel.refresh(selectedCategory)
+
+        // Set selected category button
         selectedButton.background =
             ContextCompat.getDrawable(requireContext(), R.drawable.bg_radius_16dp)
         selectedButton.setTextColor(Color.parseColor("#242A32"))
-        selectedButton.setTypeface(selectedButton.typeface, Typeface.BOLD)
 
-        unselectedButton1.background =
-            ContextCompat.getDrawable(requireContext(), R.drawable.bg_radius_16dp_dark)
-        unselectedButton1.setTextColor(Color.parseColor("#EEEEEE"))
-        unselectedButton1.setTypeface(selectedButton.typeface, Typeface.NORMAL)
+        // Set unselected button 1..3
+        setUnselectedButton(unselectedButton1)
+        setUnselectedButton(unselectedButton2)
+        setUnselectedButton(unselectedButton3)
+    }
 
-        unselectedButton2.background =
+    private fun setUnselectedButton(unselectedButton: Button) {
+        unselectedButton.background =
             ContextCompat.getDrawable(requireContext(), R.drawable.bg_radius_16dp_dark)
-        unselectedButton2.setTextColor(Color.parseColor("#EEEEEE"))
-        unselectedButton2.setTypeface(selectedButton.typeface, Typeface.NORMAL)
-
-        unselectedButton3.background =
-            ContextCompat.getDrawable(requireContext(), R.drawable.bg_radius_16dp_dark)
-        unselectedButton3.setTextColor(Color.parseColor("#EEEEEE"))
-        unselectedButton3.setTypeface(selectedButton.typeface, Typeface.NORMAL)
+        unselectedButton.setTextColor(Color.parseColor("#EEEEEE"))
     }
 
     private fun observeViewModel() {
@@ -163,7 +134,7 @@ class HomeFragment : Fragment() {
                     visibility = View.VISIBLE
                     adapter = MovieListAdapter(
                         requireContext(),
-                        movieList.results as ArrayList<MovieResponse>
+                        movieList as ArrayList<Movie>
                     )
                 }
             }

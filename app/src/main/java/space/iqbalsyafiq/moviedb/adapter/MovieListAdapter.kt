@@ -7,16 +7,15 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.item_movie.view.*
-import space.iqbalsyafiq.moviedb.R
 import space.iqbalsyafiq.moviedb.constants.ApiConstants.Companion.IMAGE_BASE_URL
 import space.iqbalsyafiq.moviedb.databinding.ItemMovieBinding
-import space.iqbalsyafiq.moviedb.model.movie.MovieResponse
+import space.iqbalsyafiq.moviedb.model.movie.Movie
 import space.iqbalsyafiq.moviedb.utils.getProgressDrawable
 import space.iqbalsyafiq.moviedb.utils.loadImage
 
 class MovieListAdapter(
     val context: Context,
-    val listMovie: ArrayList<MovieResponse>
+    val listMovie: ArrayList<Movie>
 ) : RecyclerView.Adapter<MovieListAdapter.ViewHolder>() {
 
     private lateinit var binding: ItemMovieBinding
@@ -38,8 +37,7 @@ class MovieListAdapter(
         with(holder.itemView) {
             tvMovieTitle.text = movie.title
             tvMovieReleaseDate.text = movie.releaseDate
-            tvTitleOptional.text = R.string.average_rating.toString()
-            tvMovieOptional.text = movie.voteAverage.toString()
+            tvAverageRating.text = movie.voteAverage.toString()
             ivMoviePoster.loadImage(
                 "${IMAGE_BASE_URL}${movie.posterPath}",
                 getProgressDrawable(context)

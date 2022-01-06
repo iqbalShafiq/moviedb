@@ -7,8 +7,12 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.observers.DisposableSingleObserver
 import io.reactivex.schedulers.Schedulers
+import kotlinx.coroutines.launch
 import space.iqbalsyafiq.moviedb.api.MovieApiService
+import space.iqbalsyafiq.moviedb.db.MovieDatabase
+import space.iqbalsyafiq.moviedb.model.movie.Movie
 import space.iqbalsyafiq.moviedb.model.movie.MovieListResponse
+import space.iqbalsyafiq.moviedb.utils.SharedPreferencesHelper
 
 class MovieListViewModel(application: Application) :
     BaseViewModel(application) {
@@ -17,17 +21,33 @@ class MovieListViewModel(application: Application) :
 
     private val movieService = MovieApiService()
     private val disposable = CompositeDisposable()
+    private val prefHelper = SharedPreferencesHelper(getApplication())
+    private val refreshTime = 5 * 60 * 1000 * 1000 * 1000L
 
-    val movies = MutableLiveData<MovieListResponse>()
+    val movies = MutableLiveData<List<Movie>>()
     val loadError = MutableLiveData<Boolean>()
     val loading = MutableLiveData<Boolean>()
 
     fun refresh(category: String) {
-        when (category) {
-            "Now Playing" -> fetchNowPlayingRemotely()
-            "Top Rated" -> fetchTopRatedRemotely()
-            "Popular" -> fetchPopularRemotely()
-            "Upcoming" -> fetchUpcomingRemotely()
+        val updateTime = prefHelper.getListUpdateTime("List Time $category")
+
+        if (updateTime != null && updateTime != 0L && System.nanoTime() - updateTime < refreshTime) {
+            fetchFromDatabaseByCategory(category)
+        } else {
+            when (category) {
+                "Now Playing" -> fetchNowPlayingRemotely()
+                "Top Rated" -> fetchTopRatedRemotely()
+                "Popular" -> fetchPopularRemotely()
+                "Upcoming" -> fetchUpcomingRemotely()
+            }
+        }
+    }
+
+    private fun fetchFromDatabaseByCategory(category: String) {
+        loading.value = true
+        launch {
+            val listMovie = MovieDatabase(getApplication()).movieDao().getMoviesByCategory(category)
+            retrieveMovie(listMovie)
         }
     }
 
@@ -40,10 +60,12 @@ class MovieListViewModel(application: Application) :
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(object : DisposableSingleObserver<MovieListResponse>() {
                     override fun onSuccess(listMovie: MovieListResponse) {
-                        movies.value = listMovie
+                        movies.value = listMovie.results
                         loadError.value = false
                         loading.value = false
                         Log.d(TAG, "onSuccess: ${movies.value}")
+
+                        storeMovieLocally("Upcoming", listMovie.results)
                     }
 
                     override fun onError(e: Throwable) {
@@ -65,10 +87,12 @@ class MovieListViewModel(application: Application) :
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(object : DisposableSingleObserver<MovieListResponse>() {
                     override fun onSuccess(listMovie: MovieListResponse) {
-                        movies.value = listMovie
+                        movies.value = listMovie.results
                         loadError.value = false
                         loading.value = false
                         Log.d(TAG, "onSuccess: ${movies.value}")
+
+                        storeMovieLocally("Now Playing", listMovie.results)
                     }
 
                     override fun onError(e: Throwable) {
@@ -90,10 +114,12 @@ class MovieListViewModel(application: Application) :
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(object : DisposableSingleObserver<MovieListResponse>() {
                     override fun onSuccess(listMovie: MovieListResponse) {
-                        movies.value = listMovie
+                        movies.value = listMovie.results
                         loadError.value = false
                         loading.value = false
                         Log.d(TAG, "onSuccess: ${movies.value}")
+
+                        storeMovieLocally("Top Rated", listMovie.results)
                     }
 
                     override fun onError(e: Throwable) {
@@ -115,10 +141,12 @@ class MovieListViewModel(application: Application) :
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(object : DisposableSingleObserver<MovieListResponse>() {
                     override fun onSuccess(listMovie: MovieListResponse) {
-                        movies.value = listMovie
+                        movies.value = listMovie.results
                         loadError.value = false
                         loading.value = false
                         Log.d(TAG, "onSuccess: ${movies.value}")
+
+                        storeMovieLocally("Popular", listMovie.results)
                     }
 
                     override fun onError(e: Throwable) {
@@ -129,6 +157,33 @@ class MovieListViewModel(application: Application) :
 
                 })
         )
+    }
+
+    private fun storeMovieLocally(category: String, listMovie: List<Movie>) {
+        launch {
+            // initiate dao and clear all
+            val dao = MovieDatabase(getApplication()).movieDao()
+            dao.deleteMoviesByCategory(category)
+
+            // set the category of movie
+            for (movie in listMovie) {
+                movie.category = category
+            }
+
+            // store to roomDB
+            dao.insertAll(*listMovie.toTypedArray())
+
+            // retrieve movies from database
+            retrieveMovie(listMovie)
+        }
+
+        prefHelper.saveListUpdateTime(System.nanoTime(), "List Time $category")
+    }
+
+    private fun retrieveMovie(listMovie: List<Movie>) {
+        movies.value = listMovie
+        loadError.value = false
+        loading.value = false
     }
 
     override fun onCleared() {

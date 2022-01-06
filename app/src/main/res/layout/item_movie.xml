@@ -66,17 +66,16 @@
             tools:text="Spiderman No Way Home" />
 
         <TextView
-            android:id="@+id/tvTitleOptional"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
             android:fontFamily="@font/poppins_medium"
             android:textColor="@color/light_primary"
             android:textSize="12sp"
-            tools:text="Average Rating" />
+            android:text="@string/average_rating" />
 
         <TextView
-            android:id="@+id/tvMovieOptional"
+            android:id="@+id/tvAverageRating"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:ellipsize="end"

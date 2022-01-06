@@ -21,4 +21,9 @@
     <string name="rate_count">Rate Count</string>
     <string name="popularity">Popularity:</string>
     <string name="profile_image">profile image</string>
+    <string name="error_when_fetching_api">Error when fetching API</string>
+    <string name="top_rated">Top Rated</string>
+    <string name="popular">Popular</string>
+    <string name="now_playing">Now Playing</string>
+    <string name="upcoming">Upcoming</string>
 </resources>

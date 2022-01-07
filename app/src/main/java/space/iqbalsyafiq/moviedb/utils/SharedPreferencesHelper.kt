@@ -8,6 +8,10 @@ import androidx.preference.PreferenceManager
 class SharedPreferencesHelper {
     companion object {
         private var prefs: SharedPreferences? = null
+        const val NOW_PLAYING = "Now Playing"
+        const val POPULAR = "Popular"
+        const val UPCOMING = "Upcoming"
+        const val TOP_RATED = "Top Rated"
 
         @Volatile
         private var instance: SharedPreferencesHelper? = null

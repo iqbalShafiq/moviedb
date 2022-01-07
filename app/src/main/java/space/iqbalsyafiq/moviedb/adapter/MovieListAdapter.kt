@@ -15,6 +15,7 @@ import space.iqbalsyafiq.moviedb.model.movie.Movie
 import space.iqbalsyafiq.moviedb.utils.getProgressDrawable
 import space.iqbalsyafiq.moviedb.utils.loadImage
 import space.iqbalsyafiq.moviedb.view.fragments.HomeFragment
+import space.iqbalsyafiq.moviedb.view.fragments.WatchListFragment
 
 class MovieListAdapter(
     val context: Context,
@@ -50,6 +51,7 @@ class MovieListAdapter(
             // Watch List
             ivBookmark.setOnClickListener {
                 if (fragment is HomeFragment) fragment.watchListed(movie)
+                else if (fragment is WatchListFragment) fragment.deleteWatchListById(movie.id)
             }
 
             if (movie.isWatchListed) ivBookmark.setBackgroundResource(R.drawable.ic_bookmarked)
@@ -58,6 +60,7 @@ class MovieListAdapter(
             // Rating
             ivRate.setOnClickListener {
                 if (fragment is HomeFragment) fragment.showDialogRating(movie)
+                else if (fragment is WatchListFragment) fragment.showDialogRating(movie)
             }
 
             if (movie.rating != 0.0) {

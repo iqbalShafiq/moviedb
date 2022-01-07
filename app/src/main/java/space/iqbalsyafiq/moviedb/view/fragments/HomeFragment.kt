@@ -14,6 +14,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.dialog_rating.*
 import space.iqbalsyafiq.moviedb.R
@@ -26,9 +27,11 @@ import space.iqbalsyafiq.moviedb.viewmodel.MovieListViewModel
 class HomeFragment : Fragment() {
 
     private lateinit var binding: FragmentHomeBinding
-    val viewModel: MovieListViewModel by activityViewModels()
+    private val viewModel: MovieListViewModel by activityViewModels()
     private lateinit var adapter: MovieListAdapter
     private var selectedCategory = "Top Rated"
+    private lateinit var layoutManager: LinearLayoutManager
+    private var page = 1
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -47,7 +50,6 @@ class HomeFragment : Fragment() {
 
         // fetch data
         viewModel.refresh("Now Playing")
-        viewModel.getGuestSession()
 
         // set view
         with(binding) {
@@ -69,6 +71,7 @@ class HomeFragment : Fragment() {
 
                 adapter = adapter
             }
+            layoutManager = rvMovies.layoutManager as LinearLayoutManager
 
             // on refresh
             refreshLayout.setOnRefreshListener {
@@ -78,6 +81,7 @@ class HomeFragment : Fragment() {
                 tvLoadMore.visibility = View.GONE
                 etSearch.setText("")
 
+                page = 1
                 adapter.clearMovieList()
                 viewModel.refreshBypassCache(selectedCategory)
                 refreshLayout.isRefreshing = false
@@ -87,6 +91,19 @@ class HomeFragment : Fragment() {
             etSearch.addTextChangedListener {
                 Log.d("TAG", "onViewCreated: ${it.toString()}")
                 viewModel.searchMovies(it.toString(), selectedCategory)
+            }
+
+            // load more on clicked
+            tvLoadMore.setOnClickListener {
+                page++
+                viewModel.refresh(selectedCategory, page)
+            }
+
+            // watch list on click
+            llWatchList.setOnClickListener {
+                val action = HomeFragmentDirections
+                    .navigateToWatchList()
+                Navigation.findNavController(binding.root).navigate(action)
             }
         }
 
@@ -114,19 +131,23 @@ class HomeFragment : Fragment() {
 
             btnSubmit.setOnClickListener {
                 Log.d("TAG", "showDialogRating: ${dialogBinding.etRate.text}")
-                viewModel.rateMovie(dialogBinding.etRate.text.toString(), movie)
-                dialog.dismiss()
+                val value = dialogBinding.etRate.text.toString()
+                if (value.toDouble() > 0.0 && value.toDouble() <= 10) {
+                    viewModel.rateMovie(value, movie)
+                    dialog.dismiss()
+                }
             }
         }
 
         dialog.apply {
             window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
             show()
-            window?.setLayout(800, 550);
+            window?.setLayout(800, 750)
         }
     }
 
     private fun categoryOnClick() {
+        page = 1
         with(binding) {
             btnTopRated.setOnClickListener {
                 setSelectedButton(btnTopRated, btnPopular, btnNowPlaying, btnUpcoming)
@@ -174,7 +195,7 @@ class HomeFragment : Fragment() {
     }
 
     fun watchListed(movie: Movie) {
-        viewModel.storeWatchList(movie, selectedCategory)
+        viewModel.storeWatchList(movie)
     }
 
     private fun observeViewModel() {
@@ -188,6 +209,7 @@ class HomeFragment : Fragment() {
                         this@HomeFragment
                     )
                 }
+                binding.tvLoadMore.visibility = if (movieList.isEmpty()) View.GONE else View.VISIBLE
             }
         })
 
@@ -208,8 +230,15 @@ class HomeFragment : Fragment() {
         viewModel.loading.observe(viewLifecycleOwner, { isLoading ->
             isLoading?.let {
                 binding.progressLoad.visibility = if (isLoading) View.VISIBLE else View.GONE
-                binding.rvMovies.visibility = if (isLoading) View.GONE else View.VISIBLE
-                binding.tvLoadMore.visibility = if (isLoading) View.GONE else View.VISIBLE
+                binding.tvLoadMore.text = if (isLoading) "Loading ..." else "Load More"
+//                binding.rvMovies.addOnScrollListener(object: InfiniteScrollListener(layoutManager) {
+//                    override fun onLoadMore() {
+//                        viewModel.refresh(selectedCategory, page)
+//                    }
+//
+//                    override fun isDataLoading(): Boolean = !isLoading
+//
+//                })
             }
         })
     }

@@ -47,12 +47,23 @@ class MovieListAdapter(
                 getProgressDrawable(context)
             )
 
-            if (movie.isWatchListed) ivBookmark.setBackgroundResource(R.drawable.ic_bookmarked)
-            else ivBookmark.setBackgroundResource(R.drawable.ic_bookmark)
-
+            // Watch List
             ivBookmark.setOnClickListener {
                 if (fragment is HomeFragment) fragment.watchListed(movie)
             }
+
+            if (movie.isWatchListed) ivBookmark.setBackgroundResource(R.drawable.ic_bookmarked)
+            else ivBookmark.setBackgroundResource(R.drawable.ic_bookmark)
+
+            // Rating
+            ivRate.setOnClickListener {
+                if (fragment is HomeFragment) fragment.showDialogRating(movie)
+            }
+
+            if (movie.rating != 0.0) {
+                ivRate.setBackgroundResource(R.drawable.ic_rate_after)
+                tvRating.text = movie.rating.toString()
+            } else ivRate.setBackgroundResource(R.drawable.ic_rate_before)
         }
     }
 

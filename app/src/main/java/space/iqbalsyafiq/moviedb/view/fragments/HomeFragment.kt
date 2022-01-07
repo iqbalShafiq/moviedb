@@ -1,17 +1,24 @@
 package space.iqbalsyafiq.moviedb.view.fragments
 
+import android.app.Dialog
 import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.Window
 import android.widget.Button
 import androidx.core.content.ContextCompat
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
+import kotlinx.android.synthetic.main.dialog_rating.*
 import space.iqbalsyafiq.moviedb.R
 import space.iqbalsyafiq.moviedb.adapter.MovieListAdapter
+import space.iqbalsyafiq.moviedb.databinding.DialogRatingBinding
 import space.iqbalsyafiq.moviedb.databinding.FragmentHomeBinding
 import space.iqbalsyafiq.moviedb.model.movie.Movie
 import space.iqbalsyafiq.moviedb.viewmodel.MovieListViewModel
@@ -40,6 +47,7 @@ class HomeFragment : Fragment() {
 
         // fetch data
         viewModel.refresh("Now Playing")
+        viewModel.getGuestSession()
 
         // set view
         with(binding) {
@@ -51,6 +59,7 @@ class HomeFragment : Fragment() {
                 btnUpcoming
             )
 
+            // recycler view
             rvMovies.apply {
                 layoutManager = LinearLayoutManager(
                     requireContext(),
@@ -61,15 +70,23 @@ class HomeFragment : Fragment() {
                 adapter = adapter
             }
 
+            // on refresh
             refreshLayout.setOnRefreshListener {
                 rvMovies.visibility = View.GONE
                 progressLoad.visibility = View.VISIBLE
                 tvErrorLoad.visibility = View.GONE
                 tvLoadMore.visibility = View.GONE
+                etSearch.setText("")
 
                 adapter.clearMovieList()
                 viewModel.refreshBypassCache(selectedCategory)
                 refreshLayout.isRefreshing = false
+            }
+
+            // search
+            etSearch.addTextChangedListener {
+                Log.d("TAG", "onViewCreated: ${it.toString()}")
+                viewModel.searchMovies(it.toString(), selectedCategory)
             }
         }
 
@@ -78,6 +95,35 @@ class HomeFragment : Fragment() {
 
         // observe view model
         observeViewModel()
+    }
+
+    fun showDialogRating(movie: Movie) {
+        val dialog = Dialog(requireContext())
+        val dialogBinding = DialogRatingBinding.inflate(layoutInflater)
+
+        dialog.apply {
+            requestWindowFeature(Window.FEATURE_NO_TITLE)
+            setCancelable(true)
+            setContentView(dialogBinding.root)
+        }
+
+        with(dialogBinding) {
+            btnCancel.setOnClickListener {
+                dialog.dismiss()
+            }
+
+            btnSubmit.setOnClickListener {
+                Log.d("TAG", "showDialogRating: ${dialogBinding.etRate.text}")
+                viewModel.rateMovie(dialogBinding.etRate.text.toString(), movie)
+                dialog.dismiss()
+            }
+        }
+
+        dialog.apply {
+            window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            show()
+            window?.setLayout(800, 550);
+        }
     }
 
     private fun categoryOnClick() {
@@ -142,6 +188,13 @@ class HomeFragment : Fragment() {
                         this@HomeFragment
                     )
                 }
+            }
+        })
+
+        viewModel.searching.observe(viewLifecycleOwner, { isSearching ->
+            isSearching?.let {
+                binding.horizontalScrollView.visibility =
+                    if (isSearching) View.GONE else View.VISIBLE
             }
         })
 

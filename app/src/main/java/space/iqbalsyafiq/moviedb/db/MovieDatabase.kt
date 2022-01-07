@@ -6,9 +6,13 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import space.iqbalsyafiq.moviedb.model.movie.Movie
+import space.iqbalsyafiq.moviedb.model.rating.GuestSessionResponse
 
 @Database(
-    entities = [Movie::class],
+    entities = [
+        Movie::class,
+        GuestSessionResponse::class
+    ],
     version = 1
 )
 @TypeConverters(Converters::class)

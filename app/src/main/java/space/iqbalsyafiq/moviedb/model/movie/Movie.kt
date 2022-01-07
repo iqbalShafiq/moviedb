@@ -36,4 +36,5 @@ data class Movie(
     var uuid: Int = 0
     var category: String? = null
     var isWatchListed: Boolean = false
+    var rating: Double = 0.0
 }

@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import space.iqbalsyafiq.moviedb.model.movie.Movie
+import space.iqbalsyafiq.moviedb.model.rating.GuestSessionResponse
 
 @Dao
 interface MovieDao {
@@ -28,10 +29,6 @@ interface MovieDao {
     @Query("DELETE FROM movie WHERE category = :movieCategory")
     suspend fun deleteMoviesByCategory(movieCategory: String)
 
-    // Get watch list by id
-    @Query("SELECT * FROM movie WHERE id = :movieId")
-    suspend fun getWatchListById(movieId: Int): Movie
-
     // Delete watch list by id
     @Query("DELETE FROM movie WHERE (category = 'Watch List' AND id = :movieId)")
     suspend fun deleteWatchListById(movieId: Int)
@@ -39,4 +36,28 @@ interface MovieDao {
     // Set watch list by id
     @Query("UPDATE movie SET isWatchListed = :isWatchListed WHERE id = :movieId")
     suspend fun setWatchListById(movieId: Int, isWatchListed: Boolean)
+
+    // Insert guest session
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertGuestSession(guestSessionId: GuestSessionResponse): Long
+
+    // Get guest session
+    @Query("SELECT * FROM guestsessionresponse")
+    suspend fun getGuestSession(): GuestSessionResponse
+
+    // Delete all guest session
+    @Query("DELETE FROM guestsessionresponse")
+    suspend fun deleteAllSession()
+
+    // Get rating by Id
+    @Query("SELECT * FROM movie WHERE (id = :movieId AND category = 'Rated')")
+    suspend fun getRatingById(movieId: Int): Movie
+
+    // Set rating by id
+    @Query("UPDATE movie SET rating = :rating WHERE id = :movieId")
+    suspend fun setRatingById(movieId: Int, rating: Double)
+
+    // Delete rating by id
+    @Query("DELETE FROM movie WHERE (category = 'Rated' AND id = :movieId)")
+    suspend fun deleteRatingById(movieId: Int)
 }

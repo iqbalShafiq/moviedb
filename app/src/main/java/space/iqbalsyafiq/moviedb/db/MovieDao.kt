@@ -5,7 +5,6 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import space.iqbalsyafiq.moviedb.model.movie.Movie
-import space.iqbalsyafiq.moviedb.model.rating.GuestSessionResponse
 
 @Dao
 interface MovieDao {
@@ -36,18 +35,6 @@ interface MovieDao {
     // Set watch list by id
     @Query("UPDATE movie SET isWatchListed = :isWatchListed WHERE id = :movieId")
     suspend fun setWatchListById(movieId: Int, isWatchListed: Boolean)
-
-    // Insert guest session
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertGuestSession(guestSessionId: GuestSessionResponse): Long
-
-    // Get guest session
-    @Query("SELECT * FROM guestsessionresponse")
-    suspend fun getGuestSession(): GuestSessionResponse
-
-    // Delete all guest session
-    @Query("DELETE FROM guestsessionresponse")
-    suspend fun deleteAllSession()
 
     // Get rating by Id
     @Query("SELECT * FROM movie WHERE (id = :movieId AND category = 'Rated')")

@@ -147,7 +147,6 @@ class HomeFragment : Fragment() {
     }
 
     private fun categoryOnClick() {
-        page = 1
         with(binding) {
             btnTopRated.setOnClickListener {
                 setSelectedButton(btnTopRated, btnPopular, btnNowPlaying, btnUpcoming)
@@ -173,6 +172,7 @@ class HomeFragment : Fragment() {
         unselectedButton2: Button,
         unselectedButton3: Button
     ) {
+        page = 1
         // set selected category and load api from view model
         selectedCategory = selectedButton.text.toString()
         viewModel.refresh(selectedCategory)
@@ -231,14 +231,6 @@ class HomeFragment : Fragment() {
             isLoading?.let {
                 binding.progressLoad.visibility = if (isLoading) View.VISIBLE else View.GONE
                 binding.tvLoadMore.text = if (isLoading) "Loading ..." else "Load More"
-//                binding.rvMovies.addOnScrollListener(object: InfiniteScrollListener(layoutManager) {
-//                    override fun onLoadMore() {
-//                        viewModel.refresh(selectedCategory, page)
-//                    }
-//
-//                    override fun isDataLoading(): Boolean = !isLoading
-//
-//                })
             }
         })
     }

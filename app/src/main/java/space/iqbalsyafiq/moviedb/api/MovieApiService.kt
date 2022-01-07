@@ -6,7 +6,6 @@ import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 import space.iqbalsyafiq.moviedb.constants.ApiConstants
 import space.iqbalsyafiq.moviedb.model.movie.MovieListResponse
-import space.iqbalsyafiq.moviedb.model.rating.GuestSessionResponse
 
 class MovieApiService {
     private val api = Retrofit.Builder()
@@ -34,11 +33,6 @@ class MovieApiService {
     // Get upcoming movies
     fun getUpcomingMovies(page: Int = 1): Single<MovieListResponse> {
         return api.getUpcomingMovies(page = page)
-    }
-
-    // Get guest session
-    fun getGuestSession(): Single<GuestSessionResponse> {
-        return api.getGuestSession()
     }
 
     // Get search result

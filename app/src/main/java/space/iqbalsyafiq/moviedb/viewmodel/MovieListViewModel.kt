@@ -22,7 +22,7 @@ class MovieListViewModel(application: Application) :
     private val movieService = MovieApiService()
     private val disposable = CompositeDisposable()
     private val prefHelper = SharedPreferencesHelper(getApplication())
-    private val refreshTime = 30 * 60 * 1000 * 1000 * 1000L
+//    private val refreshTime = 30 * 60 * 1000 * 1000 * 1000L
     private var movieList: MutableList<Movie> = mutableListOf()
 
     // Live Data
@@ -32,24 +32,33 @@ class MovieListViewModel(application: Application) :
     val searching = MutableLiveData<Boolean>()
 
     fun refresh(category: String, page: Int = 1) {
+        /** Error when paginating
         val updateTime = prefHelper.getListUpdateTime(category)
-        if (page == 1) movieList.clear()
-
         if (
-            updateTime != null &&
-            updateTime != 0L &&
-            System.nanoTime() - updateTime < refreshTime &&
-            page == 1
+        updateTime != null &&
+        updateTime != 0L &&
+        System.nanoTime() - updateTime < refreshTime &&
+        page == 1
         ) {
-            fetchFromDatabaseByCategory(category)
+        fetchFromDatabaseByCategory(category)
         } else {
-            loading.value = true
-            when (category) {
-                "Now Playing" -> fetchNowPlayingRemotely(page)
-                "Top Rated" -> fetchTopRatedRemotely(page)
-                "Popular" -> fetchPopularRemotely(page)
-                "Upcoming" -> fetchUpcomingRemotely(page)
-            }
+        loading.value = true
+        when (category) {
+        "Now Playing" -> fetchNowPlayingRemotely(page)
+        "Top Rated" -> fetchTopRatedRemotely(page)
+        "Popular" -> fetchPopularRemotely(page)
+        "Upcoming" -> fetchUpcomingRemotely(page)
+        }
+        }
+         **/
+
+        if (page == 1) movieList.clear()
+        loading.value = true
+        when (category) {
+            "Now Playing" -> fetchNowPlayingRemotely(page)
+            "Top Rated" -> fetchTopRatedRemotely(page)
+            "Popular" -> fetchPopularRemotely(page)
+            "Upcoming" -> fetchUpcomingRemotely(page)
         }
     }
 
@@ -104,14 +113,16 @@ class MovieListViewModel(application: Application) :
         )
     }
 
+    /**
     private fun fetchFromDatabaseByCategory(category: String) {
-        Log.d(TAG, "fetchFrom: database")
-        loading.value = true
-        launch {
-            val listMovie = MovieDatabase(getApplication()).movieDao().getMoviesByCategory(category)
-            retrieveMovie(listMovie)
-        }
+    Log.d(TAG, "fetchFrom: database")
+    loading.value = true
+    launch {
+    val listMovie = MovieDatabase(getApplication()).movieDao().getMoviesByCategory(category)
+    retrieveMovie(listMovie)
     }
+    }
+     */
 
     private fun fetchUpcomingRemotely(page: Int = 1) {
         disposable.add(

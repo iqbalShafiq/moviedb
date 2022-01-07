@@ -5,7 +5,6 @@ import retrofit2.http.GET
 import retrofit2.http.Query
 import space.iqbalsyafiq.moviedb.constants.ApiConstants
 import space.iqbalsyafiq.moviedb.model.movie.MovieListResponse
-import space.iqbalsyafiq.moviedb.model.rating.GuestSessionResponse
 
 interface MovieAPI {
 
@@ -36,12 +35,6 @@ interface MovieAPI {
         @Query("api_key") apiKey: String = ApiConstants.API_KEY,
         @Query("page") page: Int = 1
     ): Single<MovieListResponse>
-
-    // Get guest session
-    @GET("authentication/guest_session/new")
-    fun getGuestSession(
-        @Query("api_key") apiKey: String = ApiConstants.API_KEY
-    ): Single<GuestSessionResponse>
 
     // Search movies
     @GET("search/movie")

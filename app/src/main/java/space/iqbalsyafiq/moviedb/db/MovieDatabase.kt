@@ -11,7 +11,7 @@ import space.iqbalsyafiq.moviedb.model.movie.Movie
     entities = [
         Movie::class
     ],
-    version = 2
+    version = 1
 )
 @TypeConverters(Converters::class)
 abstract class MovieDatabase : RoomDatabase() {
@@ -32,6 +32,6 @@ abstract class MovieDatabase : RoomDatabase() {
             context.applicationContext,
             MovieDatabase::class.java,
             "moviedatabase"
-        ).fallbackToDestructiveMigration().build()
+        ).build()
     }
 }

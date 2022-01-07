@@ -225,8 +225,10 @@ class MovieListViewModel(application: Application) :
             val watchList = dao.getMoviesByCategory("Watch List")
 
             // set the category of movie
-            for (movie in listMovie) {
+            val iterator = listMovie.iterator()
+            while (iterator.hasNext()) {
                 // set category and check does it listed on watchlist
+                val movie = iterator.next()
                 movie.category = category
                 if (watchList.contains(movie)) movie.isWatchListed = true
 
